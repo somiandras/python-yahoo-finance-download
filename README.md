@@ -6,12 +6,12 @@ This was heavily influenced by __c0redumb's__ [yahoo_quote_download](https://git
 
 For the Yahoo Finance API changes read __c0redumb's__ [description](https://github.com/c0redumb/yahoo_quote_download). 
 
-#### get_series(ticker, data_type[, start_date])
+#### get_series(ticker, data_type, start_date)
 
-Returns the csv data for the specified data type (history, div or split) from the specified start date. Start date has to be a datetime object, it defaults to 20 years before today.
+Returns the csv data for the specified data type (history, div or split) from the specified start date. Start date has to be a datetime object.
 
 #### get_all_data(ticker[, start_date])
 
-Returns an iterator of all the three data types. Start date has to be a datetime object, it defaults to 20 years before today.
+Returns an iterator of all the three data types. Start date has to be a datetime object, defaults to same day 20 years before.
 
 Any comments and suggestions are welcome.

@@ -33,8 +33,7 @@ def _get_crumb_and_cookies():
 
 def get_series(ticker, data_type, start_date):
     '''Returns the csv data for the specified data type (history, div or split)
-    from the specified start date. Start date has to be a datetime object,
-    it defaults to 20 years before today'''
+    from the specified start date. Start date has to be a datetime object.'''
     params = {
         'period1': int(start_date.timestamp()),
         'period2': int(datetime.today().timestamp()),
@@ -52,7 +51,7 @@ def get_series(ticker, data_type, start_date):
 
 def get_all_data(ticker, start_date=default_start_date):
     '''Returns an iterator of all the three data types. Start date has to be
-    a datetime object, it defaults to 20 years before today'''
+    a datetime object, defaults to same day 20 years before.'''
     if _cookie is None or _crumb is None:
         _get_crumb_and_cookies()
     data = None
@@ -73,4 +72,3 @@ def get_all_data(ticker, start_date=default_start_date):
                 data = None
         else:
             yield data
-
