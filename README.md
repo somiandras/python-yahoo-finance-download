@@ -28,5 +28,18 @@ import datetime
 start_date = datetime.datetime(2000, 1, 1)
 df = get_history('AAPL', start_date)
 print(df.info())
->>> <class 'pandas.core.frame.DataFrame'>
+
+<class 'pandas.core.frame.DataFrame'>
+Index: 4382 entries, 2000-01-03 to 2017-06-02
+Data columns (total 8 columns):
+Open            4382 non-null float64
+High            4382 non-null float64
+Low             4382 non-null float64
+Close           4382 non-null float64
+Adj Close       4382 non-null float64
+Volume          4382 non-null int64
+Dividends       4382 non-null float64
+Stock Splits    4382 non-null object
+dtypes: float64(6), int64(1), object(1)
+memory usage: 308.1+ KB
 ```
