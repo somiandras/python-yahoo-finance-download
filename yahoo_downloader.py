@@ -6,6 +6,9 @@ import requests
 import re
 from datetime import datetime
 import json
+from time import sleep
+import pandas as pd
+import io
 
 DATA_TYPES = ['history', 'div', 'split']
 default_start_date = datetime.today().replace(year=datetime.today().year - 20)
@@ -44,7 +47,9 @@ def get_series(ticker, data_type, start_date):
     url = 'https://query1.finance.yahoo.com/v7/finance/download/{}'.format(ticker)
     r = requests.get(url, params=params, cookies=_cookie)
     if r.status_code == requests.codes.ok:
-        return(r.text)
+        df = pd.read_csv(io.BytesIO(r.content))
+        df.set_index('Date', inplace=True)
+        return df
     else:
         raise Exception(r.text)
 
@@ -60,9 +65,10 @@ def get_all_data(ticker, start_date=default_start_date):
             data = get_series(ticker, data_type, start_date)
         except Exception as e:
             exc = json.loads(str(e))
-            # In case of occasional authorization error renew crumb and cookie and fetch data
-            # See here: https://github.com/c0redumb/yahoo_quote_download/issues/3
+            # In case of occasional authorization error sleep for a while, renew crumb and cookie 
+            # and fetch data. See the issue here: https://github.com/c0redumb/yahoo_quote_download/issues/3
             if 'finance' in exc:
+                sleep(0.5)
                 _get_crumb_and_cookies()
                 data = get_series(ticker, data_type, start_date)
             # Handle missing ticker error
