@@ -50,30 +50,32 @@ def get_single_data_type(ticker, data_type, start_date=default_start_date):
         df = pd.read_csv(io.BytesIO(r.content))
         df.set_index('Date', inplace=True)
         return df
+    elif r.status_code == 404:
+        raise Exception('Not Found')
+    elif r.status_code == 401:
+        raise Exception('Authorization Error')
     else:
-        raise Exception(r.text)
+        r.raise_for_status()
 
 
 def _get_all_data_types(ticker, start_date):
     '''Returns an iterator of all the three data types. Start date has to be a datetime object.'''
     if _cookie is None or _crumb is None:
         _get_crumb_and_cookies()
+
     data = None
     for data_type in DATA_TYPES:
         try:
             data = get_single_data_type(ticker, data_type, start_date)
         except Exception as e:
-            exc = json.loads(str(e))
-            # In case of occasional authorization error sleep for a while, renew crumb and cookie 
-            # and fetch data. See the issue here: https://github.com/c0redumb/yahoo_quote_download/issues/3
-            if 'finance' in exc:
-                sleep(0.5)
+            # In case of occasional authorization error sleep for a while, renew crumb and cookie and fetch data again. 
+            # See the issue here: https://github.com/c0redumb/yahoo_quote_download/issues/3
+            if e == 'Authorization Error':
+                sleep(1)
                 _get_crumb_and_cookies()
                 data = get_single_data_type(ticker, data_type, start_date)
-            # Handle missing ticker error
-            elif 'chart' in exc and exc['chart']['error']['code'] == 'Not Found':
-                desc = exc['chart']['error']['description']
-                print('{} {}: {}'.format(ticker, data_type, desc))
+            else:
+                print(e)
         else:
             yield data
 
@@ -90,8 +92,12 @@ def get_history(ticker, start_date=default_start_date):
     '''Returns quotes, dividends and splits in one Pandas DataFrame. Start date
     has to be a datetime object. Defaults to 20 years before today.'''
     frames = list(_get_all_data_types(ticker, start_date))
-    full_data = pd.concat(frames, axis=1)
-    full_data['Dividends'].fillna(0, inplace=True)
-    full_data['Stock Splits'].fillna(1, inplace=True)
-    full_data['Stock Splits'].apply(_format_splits)
-    return full_data
+    try:
+        full_data = pd.concat(frames, axis=1)
+        full_data['Dividends'].fillna(0, inplace=True)
+        full_data['Stock Splits'].fillna(1, inplace=True)
+        full_data['Stock Splits'].apply(_format_splits)
+        return full_data
+    except Exception as e:
+        print(e)
+        return pd.DataFrame()
