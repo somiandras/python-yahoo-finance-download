@@ -18,3 +18,15 @@ Returns a dataframe for the specified data type [history|div|split] from the spe
 #### get_history(ticker[, start_date])
 
 Returns quotes, dividends and splits in one Pandas DataFrame. Start date has to be a datetime object. Defaults to 20 years before today. Splits filled with 1, dividends with 0 for calculation, otherwise the data is unchanged from what Yahoo Finance returns.
+
+### Example
+
+``` python
+from yahoo_downloader import get_history
+import datetime
+
+start_date = datetime.datetime(2000, 1, 1)
+df = get_history('AAPL', start_date)
+print(df.info())
+>>> <class 'pandas.core.frame.DataFrame'>
+```
