@@ -34,9 +34,9 @@ def _get_crumb_and_cookies():
         r.raise_for_status()
 
 
-def get_series(ticker, data_type, start_date):
-    '''Returns the csv data for the specified data type (history, div or split)
-    from the specified start date. Start date has to be a datetime object.'''
+def get_single_data_type(ticker, data_type, start_date=default_start_date):
+    '''Returns a dataframe for the specified data type [history|div|split] from the specified start date.
+    Start date has to be a datetime object. Defaults to 20 years before today.'''
     params = {
         'period1': int(start_date.timestamp()),
         'period2': int(datetime.today().timestamp()),
@@ -54,15 +54,14 @@ def get_series(ticker, data_type, start_date):
         raise Exception(r.text)
 
 
-def get_all_data(ticker, start_date=default_start_date):
-    '''Returns an iterator of all the three data types. Start date has to be
-    a datetime object, defaults to same day 20 years before.'''
+def _get_all_data_types(ticker, start_date):
+    '''Returns an iterator of all the three data types. Start date has to be a datetime object.'''
     if _cookie is None or _crumb is None:
         _get_crumb_and_cookies()
     data = None
     for data_type in DATA_TYPES:
         try:
-            data = get_series(ticker, data_type, start_date)
+            data = get_single_data_type(ticker, data_type, start_date)
         except Exception as e:
             exc = json.loads(str(e))
             # In case of occasional authorization error sleep for a while, renew crumb and cookie 
@@ -70,11 +69,29 @@ def get_all_data(ticker, start_date=default_start_date):
             if 'finance' in exc:
                 sleep(0.5)
                 _get_crumb_and_cookies()
-                data = get_series(ticker, data_type, start_date)
+                data = get_single_data_type(ticker, data_type, start_date)
             # Handle missing ticker error
             elif 'chart' in exc and exc['chart']['error']['code'] == 'Not Found':
                 desc = exc['chart']['error']['description']
                 print('{} {}: {}'.format(ticker, data_type, desc))
-                data = None
         else:
             yield data
+
+
+def _format_splits(value):
+    '''Format x/y splits to float'''
+    if value != 1:
+        numbers = value.split('/')
+        ratio = int(numbers[0]) / int(numbers[1])
+        return ratio
+
+
+def get_history(ticker, start_date=default_start_date):
+    '''Returns quotes, dividends and splits in one Pandas DataFrame. Start date
+    has to be a datetime object. Defaults to 20 years before today.'''
+    frames = list(_get_all_data_types(ticker, start_date))
+    full_data = pd.concat(frames, axis=1)
+    full_data['Dividends'].fillna(0, inplace=True)
+    full_data['Stock Splits'].fillna(1, inplace=True)
+    full_data['Stock Splits'].apply(_format_splits)
+    return full_data
