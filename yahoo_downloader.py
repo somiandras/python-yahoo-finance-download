@@ -19,10 +19,12 @@ class Downloader:
         self.attempt_counter = 0
 
     def set_ticker(self, ticker):
+        '''Sets the ticker for the downloader instance.'''
         self.ticker = ticker or self.ticker
         return self
 
     def set_years(self, years):
+        '''Sets the year range for the downloader instance.'''
         self.years = years or self.years
         return self
 
@@ -41,8 +43,9 @@ class Downloader:
             r.raise_for_status()
 
     def get_single_data_type(self, ticker=None, data_type='history', years=None):
-        '''Returns a dataframe for the specified data type [history|div|split] from the specified start date.
-        Start date has to be a datetime object. Defaults to 20 years before today.'''
+        '''Returns a dataframe of the specified data type [history|div|split] for the given ticker 
+        and specified number of years ending today (or the latest available). 
+        Defaults to the previously set ticker and 20 years.'''
         if self._cookie is None or self._crumb is None:
             self._get_crumb_and_cookies()
 
@@ -83,7 +86,7 @@ class Downloader:
             r.raise_for_status()
 
     def _get_all_data_types(self):
-        '''Returns an iterator of all the three data types. Start date has to be a datetime object.'''
+        '''Returns an iterator of all the three data types.'''
         data = None
         for data_type in self.DATA_TYPES:
             try:
@@ -101,8 +104,8 @@ class Downloader:
             return ratio
 
     def get_history(self, ticker=None, years=None):
-        '''Returns quotes, dividends and splits in single Pandas DataFrame. Start date
-        has to be a datetime object. Defaults to 20 years before today.'''
+        '''Returns quotes, dividends and splits in single Pandas DataFrame for the given ticker and 
+        specified number of years ending today (or the latest available). Defaults to the previously set ticker and 20 years.'''
         self.ticker = ticker or self.ticker
         if self.ticker is None:
             raise Exception('No Ticker')

@@ -2,44 +2,70 @@
 
 Get quote, dividend and split history for a given ticker symbol from a specified starting date to today.
 
-Influenced by __c0redumb's__ [yahoo_quote_download](https://github.com/c0redumb/yahoo_quote_download), but implemented using [requests](http://docs.python-requests.org/en/master/) instead of urllib methods. Functions return Pandas dataframes.
+Influenced by __c0redumb's__ [yahoo_quote_download](https://github.com/c0redumb/yahoo_quote_download) and __rubenafo's__ [YahooFetcher](https://github.com/rubenafo/YahooFetcher), but implemented using [requests](http://docs.python-requests.org/en/master/) for fetching data, and returning Pandas dataframes.
 
-## New Yahoo API
+### New Yahoo API
 Yahoo Finance changed how their stock data API works as of May, 2017. The data is still available on Yahoo Finance pages, but the new API uses authentication via a cookie and a 'crumb'. This module obtains these with an initial request and uses them for the subsequent requests.
 
 For the Yahoo Finance API changes read __c0redumb's__ [description](https://github.com/c0redumb/yahoo_quote_download).
 
-## Functions
+## Class
 
-#### get_single_data_type(ticker, data_type[, start_date]):
-
-Returns a dataframe for the specified data type [history|div|split] from the specified start date. Start date has to be a datetime object. Defaults to 20 years before today. Data is unchanged from what Yahoo Finance returns.
-
-#### get_history(ticker[, start_date])
-
-Returns quotes, dividends and splits in one Pandas DataFrame. Start date has to be a datetime object. Defaults to 20 years before today. Splits filled with 1, dividends with 0 for calculation, otherwise the data is unchanged from what Yahoo Finance returns.
-
-### Example
+**Downloader**_(ticker=None, years=None)_
 
 ``` python
-from yahoo_downloader import get_history
-import datetime
+from yahoo_downloader import Downloader
 
-start_date = datetime.datetime(2000, 1, 1)
-df = get_history('AAPL', start_date)
+downloader = Downloader()
+
+```
+
+## Methods
+
+*downloader.**get_single_data_type**(ticker=None, data_type='history', years=None):*
+
+Returns a dataframe of the specified data type [history|div|split] for the given ticker and specified number of years ending today (or the latest available). Defaults to the previously set ticker and 20 years.
+
+*downloader.**get_history**(ticker=None, years=None)*
+
+Returns quotes, dividends and splits in single Pandas DataFrame for the given ticker and specified number of years ending today (or the latest available). Defaults to the previously set ticker and 20 years.
+
+Splits are filled with 1s between split dates and dividends filled with 0s between ex-dividend dates (as in the Quandl Python API) to make further adjustments easier. No other transformations are made on Yahoo Finance data.
+
+*downloader.**set_ticker**(ticker)*
+
+Sets the ticker for the downloader instance.
+
+*downloader.**set_years**(years)*
+
+Sets the year range for the downloader instance.
+
+## Example
+
+``` python
+from yahoo_downloader import Downloader
+
+downloader = Downloader()
+
+# Short:
+df = downloader.get_history(ticker='MSFT', years=10)
+
+# Verbose:
+df = downloader.set_ticker('MSFT').set_years(10).get_history()
+
 print(df.info())
 
 <class 'pandas.core.frame.DataFrame'>
-Index: 4382 entries, 2000-01-03 to 2017-06-02
+Index: 2518 entries, '2007-06-08' to '2017-06-07'
 Data columns (total 8 columns):
-Open            4382 non-null float64
-High            4382 non-null float64
-Low             4382 non-null float64
-Close           4382 non-null float64
-Adj Close       4382 non-null float64
-Volume          4382 non-null int64
-Dividends       4382 non-null float64
-Stock Splits    4382 non-null object
-dtypes: float64(6), int64(1), object(1)
-memory usage: 308.1+ KB
+Open            2518 non-null float64
+High            2518 non-null float64
+Low             2518 non-null float64
+Close           2518 non-null float64
+Adj Close       2518 non-null float64
+Volume          2518 non-null int64
+Dividends       2518 non-null float64
+Stock Splits    2518 non-null int64
+dtypes: float64(6), int64(2)
+memory usage: 177.0+ KB
 ```
