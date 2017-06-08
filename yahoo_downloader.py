@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''Data downloader for Yahoo Finance, inspired by https://github.com/c0redumb/yahoo_quote_download'''
+'''Data downloader for Yahoo Finance API 2017'''
 
 import requests
 import re
@@ -19,17 +19,20 @@ class Downloader:
         self.attempt_counter = 0
 
     def set_ticker(self, ticker):
-        '''Sets the ticker for the downloader instance.'''
+        '''Set the ticker for the downloader instance.'''
+
         self.ticker = ticker or self.ticker
         return self
 
     def set_years(self, years):
-        '''Sets the year range for the downloader instance.'''
+        '''Set the year range for the downloader instance.'''
+
         self.years = years or self.years
         return self
 
     def _get_crumb_and_cookies(self):
         '''Make an initial request to extract cookies and crumb to use in subsequent requests'''
+
         url = 'https://finance.yahoo.com/quote/^GSPC'
         r = requests.get(url)
         if r.status_code == requests.codes.ok:
@@ -43,15 +46,16 @@ class Downloader:
             r.raise_for_status()
 
     def get_single_data_type(self, ticker=None, data_type='history', years=None):
-        '''Returns a dataframe of the specified data type [history|div|split] for the given ticker 
-        and specified number of years ending today (or the latest available). 
+        '''Return a dataframe of the specified data type [history|div|split] for the given ticker 
+        and specified number of years ending today (or the latest available).
         Defaults to the previously set ticker and 20 years.'''
+
         if self._cookie is None or self._crumb is None:
             self._get_crumb_and_cookies()
 
         self.ticker = ticker or self.ticker
-
         self.years = years or self.years
+
         start_date = datetime.today().replace(year=datetime.today().year - self.years)
 
         self.attempt_counter += 1
@@ -86,7 +90,8 @@ class Downloader:
             r.raise_for_status()
 
     def _get_all_data_types(self):
-        '''Returns an iterator of all the three data types.'''
+        '''Return an iterator of all the three data types.'''
+
         data = None
         for data_type in self.DATA_TYPES:
             try:
@@ -98,14 +103,17 @@ class Downloader:
 
     def _format_splits(self, value):
         '''Format splits to float'''
+
         if value != 1:
             numbers = value.split('/')
             ratio = int(numbers[0]) / int(numbers[1])
             return ratio
 
     def get_history(self, ticker=None, years=None):
-        '''Returns quotes, dividends and splits in single Pandas DataFrame for the given ticker and 
-        specified number of years ending today (or the latest available). Defaults to the previously set ticker and 20 years.'''
+        '''Returns quotes, dividends and splits in single Pandas DataFrame f
+        or the given ticker and specified number of years ending today (or the latest available).
+        Defaults to the previously set ticker and 20 years.'''
+
         self.ticker = ticker or self.ticker
         if self.ticker is None:
             raise Exception('No Ticker')
