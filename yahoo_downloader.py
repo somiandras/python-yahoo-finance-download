@@ -11,16 +11,19 @@ import io
 
 
 class Downloader:
-    def __init__(self, ticker=None):
-        self.ticker = ticker
+    def __init__(self):
         self.DATA_TYPES = ['history', 'div', 'split']
+        self.years = 20
         self._cookie = None
         self._crumb = None
-        self._START = datetime.today().replace(year=datetime.today().year - 20)
         self.attempt_counter = 0
 
     def set_ticker(self, ticker):
-        self.ticker = ticker
+        self.ticker = ticker or self.ticker
+        return self
+
+    def set_years(self, years):
+        self.years = years or self.years
         return self
 
     def _get_crumb_and_cookies(self):
@@ -37,15 +40,18 @@ class Downloader:
         else:
             r.raise_for_status()
 
-    def get_single_data_type(self, ticker, data_type, start_date=None):
+    def get_single_data_type(self, ticker=None, data_type='history', years=None):
         '''Returns a dataframe for the specified data type [history|div|split] from the specified start date.
         Start date has to be a datetime object. Defaults to 20 years before today.'''
         if self._cookie is None or self._crumb is None:
             self._get_crumb_and_cookies()
 
-        self.attempt_counter += 1
+        self.ticker = ticker or self.ticker
 
-        start_date = start_date or self._START
+        self.years = years or self.years
+        start_date = datetime.today().replace(year=datetime.today().year - self.years)
+
+        self.attempt_counter += 1
         params = {
             'period1': int(start_date.timestamp()),
             'period2': int(datetime.today().timestamp()),
@@ -53,7 +59,7 @@ class Downloader:
             'crumb': self._crumb,
             'interval': '1d'
         }
-        url = 'https://query1.finance.yahoo.com/v7/finance/download/{}'.format(ticker)
+        url = 'https://query1.finance.yahoo.com/v7/finance/download/{}'.format(self.ticker)
         r = requests.get(url, params=params, cookies=self._cookie)
         if r.status_code == requests.codes.ok:
             df = pd.read_csv(io.BytesIO(r.content))
@@ -63,45 +69,46 @@ class Downloader:
         elif r.status_code == 404:
             raise Exception('Not Found')
         elif r.status_code == 401:
-            # In case of occasional authorization error renew crumb and cookie and fetch data again. Max. 10 attempts.
+            # In case of authorization error renew crumb and cookie and fetch data again. Max. 10 attempts.
             # See the issue here: https://github.com/c0redumb/yahoo_quote_download/issues/3
             self._crumb = None
             self._cookie = None
 
             if self.attempt_counter < 10:
                 print('Auth error, retrying...')
-                return self.get_single_data_type(ticker, data_type, start_date=None)
+                return self.get_single_data_type(data_type=data_type)
             else:
                 raise Exception('Permanent Auth Error')
         else:
             r.raise_for_status()
 
-    def _get_all_data_types(self, ticker, start_date):
+    def _get_all_data_types(self):
         '''Returns an iterator of all the three data types. Start date has to be a datetime object.'''
         data = None
         for data_type in self.DATA_TYPES:
             try:
-                data = self.get_single_data_type(ticker, data_type, start_date)
+                data = self.get_single_data_type(data_type=data_type)
             except Exception as e:
                 print(e)
 
             yield data
 
     def _format_splits(self, value):
-        '''Format x/y splits to float'''
+        '''Format splits to float'''
         if value != 1:
             numbers = value.split('/')
             ratio = int(numbers[0]) / int(numbers[1])
             return ratio
 
-    def get_history(self, ticker=None, start_date=None):
+    def get_history(self, ticker=None, years=None):
         '''Returns quotes, dividends and splits in single Pandas DataFrame. Start date
         has to be a datetime object. Defaults to 20 years before today.'''
-        self.ticker = ticker
+        self.ticker = ticker or self.ticker
         if self.ticker is None:
             raise Exception('No Ticker')
-        start_date = start_date or self._START
-        frames = list(self._get_all_data_types(self.ticker, start_date))
+
+        self.years = years or self.years
+        frames = list(self._get_all_data_types())
         try:
             full_data = pd.concat(frames, axis=1)
             full_data['Dividends'].fillna(0, inplace=True)
