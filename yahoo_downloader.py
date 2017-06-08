@@ -5,7 +5,6 @@
 import requests
 import re
 from datetime import datetime
-from time import sleep
 import pandas as pd
 import io
 
@@ -39,7 +38,7 @@ class Downloader:
             self._cookie = r.cookies
             search = re.search('\"CrumbStore\"\:\{\"crumb\"\:\"(.*)\"\}\,\"QuotePageStore\"', r.text)
             if search is None:
-                raise Exception('No crumb in initial response')
+                raise Exception('No crumb found in initial response')
             else:
                 self._crumb = search.group(1)
         else:
@@ -73,8 +72,6 @@ class Downloader:
             df.set_index('Date', inplace=True)
             self.attempt_counter = 0
             return df
-        elif r.status_code == 404:
-            raise Exception('Not Found')
         elif r.status_code == 401:
             # In case of authorization error renew crumb and cookie and fetch data again. Max. 10 attempts.
             # See the issue here: https://github.com/c0redumb/yahoo_quote_download/issues/3
@@ -98,8 +95,8 @@ class Downloader:
                 data = self.get_single_data_type(data_type=data_type)
             except Exception as e:
                 print(e)
-
-            yield data
+            finally:
+                yield data
 
     def _format_splits(self, value):
         '''Format splits to float'''
@@ -108,10 +105,12 @@ class Downloader:
             numbers = value.split('/')
             ratio = int(numbers[0]) / int(numbers[1])
             return ratio
+        else:
+            return value
 
     def get_history(self, ticker=None, years=None):
-        '''Returns quotes, dividends and splits in single Pandas DataFrame f
-        or the given ticker and specified number of years ending today (or the latest available).
+        '''Return quotes, dividends and splits in single Pandas DataFrame 
+        for the given ticker and specified number of years ending today (or the latest available).
         Defaults to the previously set ticker and 20 years.'''
 
         self.ticker = ticker or self.ticker
