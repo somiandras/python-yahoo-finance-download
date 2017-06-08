@@ -11,7 +11,7 @@ For the Yahoo Finance API changes read __c0redumb's__ [description](https://gith
 
 ## Class
 
-**Downloader**_(ticker=None, years=None)_
+__Downloader()__
 
 ``` python
 from yahoo_downloader import Downloader
@@ -22,21 +22,21 @@ downloader = Downloader()
 
 ## Methods
 
-*downloader.**get_single_data_type**(ticker=None, data_type='history', years=None):*
+#### downloader.get_single_data_type(ticker=None, data_type='history', years=None)
 
 Returns a dataframe of the specified data type [history|div|split] for the given ticker and specified number of years ending today (or the latest available). Defaults to the previously set ticker and 20 years.
 
-*downloader.**get_history**(ticker=None, years=None)*
+#### downloader.get_history(ticker=None, years=None)
 
 Returns quotes, dividends and splits in single Pandas DataFrame for the given ticker and specified number of years ending today (or the latest available). Defaults to the previously set ticker and 20 years.
 
 Splits are filled with 1s between split dates and dividends filled with 0s between ex-dividend dates (as in the Quandl Python API) to make further adjustments easier. No other transformations are made on Yahoo Finance data.
 
-*downloader.**set_ticker**(ticker)*
+#### downloader.set_ticker(ticker)
 
 Sets the ticker for the downloader instance.
 
-*downloader.**set_years**(years)*
+#### downloader.set_years(years)
 
 Sets the year range for the downloader instance.
 
@@ -47,10 +47,13 @@ from yahoo_downloader import Downloader
 
 downloader = Downloader()
 
-# Short:
+# Single data type:
+df = downloader.get_single_data_type(ticker='MSFT', years=10, data_type='div')
+
+# Short for full data:
 df = downloader.get_history(ticker='MSFT', years=10)
 
-# Verbose:
+# Verbose for full data:
 df = downloader.set_ticker('MSFT').set_years(10).get_history()
 
 print(df.info())
