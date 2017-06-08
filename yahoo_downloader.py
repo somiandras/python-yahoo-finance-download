@@ -98,6 +98,8 @@ class Downloader:
         '''Returns quotes, dividends and splits in single Pandas DataFrame. Start date
         has to be a datetime object. Defaults to 20 years before today.'''
         self.ticker = ticker
+        if self.ticker is None:
+            raise Exception('No Ticker')
         start_date = start_date or self._START
         frames = list(self._get_all_data_types(self.ticker, start_date))
         try:
