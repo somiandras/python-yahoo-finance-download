@@ -34,11 +34,15 @@ Splits are filled with 1s between split dates and dividends filled with 0s betwe
 
 #### downloader.set_ticker(ticker)
 
-Sets the ticker for the downloader instance.
+Sets the ticker for the downloader instance (class property `ticker`). Returns `self` so it's 'chainable'.
 
 #### downloader.set_years(years)
 
-Sets the year range for the downloader instance.
+Sets the year range for the downloader instance (class property `years`). Returns `self` so it's 'chainable'. 
+
+#### downloader.settings()
+
+Return the currently set ticker and year range in `(ticker, years)` tuple.
 
 ## Example
 
@@ -46,6 +50,15 @@ Sets the year range for the downloader instance.
 from yahoo_downloader import Downloader
 
 downloader = Downloader()
+
+# Set ticker and years:
+downloader.set_ticker('MSFT').set_years(10)
+
+# Check settings:
+settings = downloader.settings()
+print(settings)
+
+>>> ('MSFT', 10)
 
 # Single data type:
 df = downloader.get_single_data_type(ticker='MSFT', years=10, data_type='div')
