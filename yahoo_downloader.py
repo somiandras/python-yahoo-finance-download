@@ -12,21 +12,27 @@ import io
 class Downloader:
     def __init__(self):
         self.DATA_TYPES = ['history', 'div', 'split']
-        self.years = 20
         self._cookie = None
         self._crumb = None
         self.attempt_counter = 0
+        self.years = 20
+        self.ticker = None
 
     def set_ticker(self, ticker):
         '''Set the ticker for the downloader instance.'''
 
         self.ticker = ticker or self.ticker
+        if self.ticker is None:
+            raise Exception('You should specify a ticker in set_ticker()')
         return self
 
     def set_years(self, years):
         '''Set the year range for the downloader instance.'''
 
-        self.years = years or self.years
+        if years is None:
+            raise Exception('You should specify the number of years in set_years()')
+        else:
+            self.years = years
         return self
 
     def _get_crumb_and_cookies(self):
@@ -44,7 +50,7 @@ class Downloader:
         else:
             r.raise_for_status()
 
-    def get_single_data_type(self, ticker=None, data_type='history', years=None):
+    def get_single_data_type(self, ticker=None, data_type='history', years=20):
         '''Return a dataframe of the specified data type [history|div|split] for the given ticker 
         and specified number of years ending today (or the latest available).
         Defaults to the previously set ticker and 20 years.'''
@@ -53,7 +59,7 @@ class Downloader:
             self._get_crumb_and_cookies()
 
         self.ticker = ticker or self.ticker
-        self.years = years or self.years
+        self.years = years
 
         start_date = datetime.today().replace(year=datetime.today().year - self.years)
 
@@ -108,8 +114,8 @@ class Downloader:
         else:
             return value
 
-    def get_history(self, ticker=None, years=None):
-        '''Return quotes, dividends and splits in single Pandas DataFrame 
+    def get_history(self, ticker=None, years=20):
+        '''Return quotes, dividends and splits in single Pandas DataFrame
         for the given ticker and specified number of years ending today (or the latest available).
         Defaults to the previously set ticker and 20 years.'''
 
@@ -117,7 +123,7 @@ class Downloader:
         if self.ticker is None:
             raise Exception('No Ticker')
 
-        self.years = years or self.years
+        self.years = years
         frames = list(self._get_all_data_types())
         try:
             full_data = pd.concat(frames, axis=1)

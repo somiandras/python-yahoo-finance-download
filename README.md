@@ -2,7 +2,7 @@
 
 Get quote, dividend and split history for a given ticker symbol from a specified starting date to today.
 
-Influenced by __c0redumb's__ [yahoo_quote_download](https://github.com/c0redumb/yahoo_quote_download) and __rubenafo's__ [YahooFetcher](https://github.com/rubenafo/YahooFetcher), but implemented using [requests](http://docs.python-requests.org/en/master/) for fetching data, and returning Pandas dataframes.
+Inspired by __c0redumb's__ [yahoo_quote_download](https://github.com/c0redumb/yahoo_quote_download) and __rubenafo's__ [YahooFetcher](https://github.com/rubenafo/YahooFetcher), but implemented using [requests](http://docs.python-requests.org/en/master/) for fetching data, and returning Pandas dataframes.
 
 ### New Yahoo API
 Yahoo Finance changed how their stock data API works as of May, 2017. The data is still available on Yahoo Finance pages, but the new API uses authentication via a cookie and a 'crumb'. This module obtains these with an initial request and uses them for the subsequent requests.
