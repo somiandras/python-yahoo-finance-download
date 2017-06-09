@@ -22,11 +22,11 @@ downloader = Downloader()
 
 ## Methods
 
-#### downloader.get_single_data_type(ticker=None, data_type='history', years=None)
+#### downloader.get_single_data_type(ticker=None, data_type='history', years=20)
 
 Returns a dataframe of the specified data type `[history|div|split]` for the given ticker and specified number of years ending today (or the latest available). Defaults to the previously set ticker and 20 years.
 
-#### downloader.get_history(ticker=None, years=None)
+#### downloader.get_history(ticker=None, years=20)
 
 Returns quotes, dividends and splits in single Pandas DataFrame for the given ticker and specified number of years ending today (or the latest available). Defaults to the previously set ticker and 20 years.
 
