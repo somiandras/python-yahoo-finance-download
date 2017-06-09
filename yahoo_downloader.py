@@ -35,6 +35,11 @@ class Downloader:
             self.years = years
         return self
 
+    def settings(self):
+        '''Return the currently set ticker and year range in a tuple'''
+
+        return (self.ticker, self.years)
+
     def _get_crumb_and_cookies(self):
         '''Make an initial request to extract cookies and crumb to use in subsequent requests'''
 
