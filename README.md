@@ -24,7 +24,7 @@ downloader = Downloader()
 
 #### downloader.get_single_data_type(ticker=None, data_type='history', years=None)
 
-Returns a dataframe of the specified data type [history|div|split] for the given ticker and specified number of years ending today (or the latest available). Defaults to the previously set ticker and 20 years.
+Returns a dataframe of the specified data type `[history|div|split]` for the given ticker and specified number of years ending today (or the latest available). Defaults to the previously set ticker and 20 years.
 
 #### downloader.get_history(ticker=None, years=None)
 
