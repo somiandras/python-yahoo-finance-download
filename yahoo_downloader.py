@@ -38,16 +38,11 @@ class Downloader:
         else:
             r.raise_for_status()
 
-    def get_single_data_type(self, ticker=None, data_type='history', years=20):
-        '''Return a dataframe of the specified data type [history|div|split] for the given ticker 
-        and specified number of years ending today (or the latest available).
-        Defaults to the previously set ticker and 20 years.'''
+    def _get_single_data_type(self, data_type):
+        '''Return a dataframe of the specified data type [history|div|split]'''
 
         if self._cookie is None or self._crumb is None:
             self._get_crumb_and_cookies()
-
-        self.ticker = ticker or self.ticker
-        self.years = years
 
         start_date = datetime.today().replace(year=datetime.today().year - self.years)
 
@@ -74,7 +69,7 @@ class Downloader:
 
             if self.attempt_counter < 10:
                 print('Auth error, retrying...')
-                return self.get_single_data_type(data_type=data_type)
+                return self._get_single_data_type(data_type=data_type)
             else:
                 raise Exception('Permanent Auth Error')
         else:
@@ -86,7 +81,7 @@ class Downloader:
         data = None
         for data_type in self.DATA_TYPES:
             try:
-                data = self.get_single_data_type(data_type=data_type)
+                data = self._get_single_data_type(data_type=data_type)
             except Exception as e:
                 print(e)
             finally:
@@ -102,14 +97,11 @@ class Downloader:
         else:
             return value
 
-    def get_history(self, ticker=None, years=20):
+    def get_history(self, ticker, years=20):
         '''Return quotes, dividends and splits in single Pandas DataFrame
-        for the given ticker and specified number of years ending today (or the latest available).
-        Defaults to the previously set ticker and 20 years.'''
+        for the given ticker and specified number of years ending today (or the latest available).'''
 
-        self.ticker = ticker or self.ticker
-        if self.ticker is None:
-            raise Exception('No Ticker')
+        self.ticker = ticker
 
         self.years = years
         frames = list(self._get_all_data_types())
