@@ -18,23 +18,6 @@ class Downloader:
         self.years = 20
         self.ticker = None
 
-    def set_ticker(self, ticker):
-        '''Set the ticker for the downloader instance.'''
-
-        self.ticker = ticker or self.ticker
-        if self.ticker is None:
-            raise Exception('You should specify a ticker in set_ticker()')
-        return self
-
-    def set_years(self, years):
-        '''Set the year range for the downloader instance.'''
-
-        if years is None:
-            raise Exception('You should specify the number of years in set_years()')
-        else:
-            self.years = years
-        return self
-
     def settings(self):
         '''Return the currently set ticker and year range in a tuple'''
 
