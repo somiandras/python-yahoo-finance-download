@@ -28,6 +28,8 @@ Returns quotes, dividends and splits in single Pandas DataFrame for the given ti
 
 Splits are filled with 1s between split dates and dividends filled with 0s between ex-dividend dates (as in the Quandl Python API) to make further adjustments easier. No other transformations are made on Yahoo Finance data.
 
+**Note:** Dividends are adjusted with splits, but adjusted close is not adjusted by dividends... Better do adjusting yourself.
+
 #### downloader.settings()
 
 Return the currently set ticker and year range in `(ticker, years)` tuple.
