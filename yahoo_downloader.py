@@ -109,7 +109,7 @@ class Downloader:
             full_data = pd.concat(frames, axis=1)
             full_data['Dividends'].fillna(0, inplace=True)
             full_data['Stock Splits'].fillna(1, inplace=True)
-            full_data['Stock Splits'].apply(self._format_splits)
+            full_data['Stock Splits'] = full_data['Stock Splits'].apply(self._format_splits)
             return full_data
         except Exception as e:
             print(e)
