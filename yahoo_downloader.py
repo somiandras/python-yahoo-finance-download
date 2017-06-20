@@ -58,7 +58,8 @@ class Downloader:
         r = requests.get(url, params=params, cookies=self._cookie)
         if r.status_code == requests.codes.ok:
             df = pd.read_csv(io.BytesIO(r.content))
-            df.set_index('Date', inplace=True)
+            df.set_index(pd.DatetimeIndex(df['Date']), inplace=True)
+            df.drop('Date', axis=1, inplace=True)
             self.attempt_counter = 0
             return df
         elif r.status_code == 401:
