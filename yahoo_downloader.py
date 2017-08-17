@@ -7,6 +7,7 @@ import re
 from datetime import datetime
 import pandas as pd
 import io
+import logging
 
 
 class Downloader:
@@ -69,7 +70,7 @@ class Downloader:
             self._cookie = None
 
             if self.attempt_counter < 10:
-                print('Auth error, retrying...')
+                logging.warning('Auth error, retrying...')
                 return self._get_single_data_type(data_type=data_type)
             else:
                 raise Exception('Permanent Auth Error')
@@ -84,7 +85,7 @@ class Downloader:
             try:
                 data = self._get_single_data_type(data_type=data_type)
             except Exception as e:
-                print(e)
+                logging.error(e)
             finally:
                 yield data
 
@@ -113,5 +114,5 @@ class Downloader:
             full_data['Stock Splits'] = full_data['Stock Splits'].apply(self._format_splits)
             return full_data
         except Exception as e:
-            print(e)
+            logging.error(e)
             return pd.DataFrame()
